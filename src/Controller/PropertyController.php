@@ -4,9 +4,14 @@ namespace App\Controller;
 
 
 use App\Entity\Property;
+use App\Entity\PropertySearch;
+use App\Form\PropertySearchType;
 use App\Repository\PropertyRepository;
 use Doctrine\Common\Persistence\ObjectManager;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -36,32 +41,20 @@ class PropertyController extends AbstractController
      * @return Response
      */
 
-    public function index(): Response
+    public function index(PaginatorInterface $paginator, Request $request): Response
     {
-        $property = new Property();
-//        $property->setTitle('Mon premier')
-//            ->setPrice(200000)
-//            ->setRooms(4)
-//            ->setBedrooms(3)
-//            ->setDescription('une petite description')
-//            ->setSurface(60)
-//            ->setFloor(4)
-//            ->setHeat(1)
-//            ->setCity('Tunis')
-//            ->setAddress('oued ellil')
-//            ->setPostalCode('1137');
-//        $em = $this->getDoctrine()->getManager();
-//        $em->persist($property);
-//        $em->flush();
+        $search = new PropertySearch();
+        $form= $this->createForm(PropertySearchType::class,$search);
+        $form->handleRequest($request);
+        $property = $paginator->paginate(
+            $this->repository->findAllVisibleQuery($search),
+            $request->query->getInt('page', 1)/*page number*/,
+            3/*limit per page*/) ;
 
-//        $repository = $this->getDoctrine()->getRepository(Property::class);
-
-        $property = $this->repository->findAllVisible();
-//        $property[0]->setSold(false);
-//        $this->em->flush();
-        dump($property);
        return new Response($this->renderView('property/index.html.twig',[
-           'current_menu' => 'properties'
+           'current_menu' => 'properties',
+           'properties' => $property,
+           'form'=>$form->createView()
        ]));
     }
 

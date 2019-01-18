@@ -38,7 +38,7 @@ class Property
 
     /**
      * @ORM\Column(type="integer")
-     * @Assert\Range(min="10",max="70")
+     * @Assert\Range(min="10",max="300")
      */
     private $surface;
 
@@ -79,8 +79,9 @@ class Property
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Assert\Regex("/^[0-9]{5}/")
+     *
      */
+    //@Assert\Regex("/^[0-9]{5}/")
     private $postal_code;
 
     /**

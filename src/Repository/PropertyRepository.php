@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Property;
+use App\Entity\PropertySearch;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -21,19 +23,29 @@ class PropertyRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Property
+     * @return Query
      */
 
 
-    public function findAllVisible():array
+    public function findAllVisibleQuery(PropertySearch $search):Query
     {
-        return $this->findVisibleQuery()
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-            ;
+        $query= $this->findVisibleQuery();
+
+       if($search->getMaxPrice())
+       {
+           $query = $query->where('p.price <= :maxprice')
+           ->setParameter('maxprice',$search->getMaxPrice());
+       }
+
+        if($search->getMinSurface())
+        {
+            $query = $query->andWhere('p.surface >= :minsurface')
+                ->setParameter('minsurface',$search->getMinSurface());
+        }
+
+
+        return $query->getQuery();
+
     }
     public function findLatest():array
     {
